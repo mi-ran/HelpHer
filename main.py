@@ -6,35 +6,55 @@ from urllib.request import Request, urlopen
 import traceback
 from fake_useragent import UserAgent
 
-keyword = input()
-base_url = 'https://search.naver.com/search.naver'
+from flask import Flask
+from flask import render_template
+from flask import request
+from flask import make_response
 
-values = {
-    'where' : 'post',
-    'sm' : 'tab_jum',
-    'query' : keyword
-}
+flask_app = Flask(__name__)
 
-query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
-context = ssl._create_unverified_context()
-blogs = []
-try:
-    ua = UserAgent()
-    req = Request(base_url + '?' + query_string, headers={'User-Agent': str(ua.chrome)})
-    res = request.urlopen(req)
-    html_data = BS(res.read(), 'html.parser')
+@flask_app.route('/searchKeyword', methods = ['GET', 'POST'])
+def search_keyword():
+    if request.method != 'POST':
+        return
 
-    g_list = html_data.find_all('dd', attrs={'class' : 'txt_block'})
+    keyword = request.form['keyword']
+    base_url = 'https://search.naver.com/search.naver'
+
+    values = {
+        'where' : 'post',
+        'sm' : 'tab_jum',
+        'query' : keyword
+    }
+
+    query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
+    context = ssl._create_unverified_context()
+    blogs = []
     try:
-        for g in g_list:
-            blog = g.find('a', attrs={'class' : 'txt84'})
-            if blog:
-                name = blog.get_text()
-                blogs.append(name)
+        ua = UserAgent()
+        req = Request(base_url + '?' + query_string, headers={'User-Agent': str(ua.chrome)})
+        res = urlopen(req)
+        html_data = BS(res.read(), 'html.parser')
+
+        g_list = html_data.find_all('dd', attrs={'class' : 'txt_block'})
+        try:
+            for g in g_list:
+                blog = g.find('a', attrs={'class' : 'txt84'})
+                if blog:
+                    name = blog.get_text()
+                    blogs.append(name)
+        except:
+            traceback.print_exc()
     except:
         traceback.print_exc()
-except:
-    traceback.print_exc()
 
-for b in blogs:
-    print(b)
+    return render_template('index.html', blogs=blogs)
+
+
+@flask_app.route('/')
+def index():
+    return render_template('index.html', blogs=[])
+
+
+if __name__ == '__main__':
+    flask_app.run()
