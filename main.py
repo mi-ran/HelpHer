@@ -19,6 +19,7 @@ def search_keyword():
         return
 
     keyword = request.form['keyword']
+    input_url = request.form['url']
     base_url = 'https://search.naver.com/search.naver'
 
     values = {
@@ -29,7 +30,8 @@ def search_keyword():
 
     query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
     context = ssl._create_unverified_context()
-    blogs = []
+    rank = '순위 밖'
+    url = ''
     try:
         ua = UserAgent()
         req = Request(base_url + '?' + query_string, headers={'User-Agent': str(ua.chrome)})
@@ -38,22 +40,27 @@ def search_keyword():
 
         g_list = html_data.find_all('dd', attrs={'class' : 'txt_block'})
         try:
+            urls = []
             for g in g_list:
-                blog = g.find('a', attrs={'class' : 'txt84'})
-                if blog:
-                    name = blog.get_text()
-                    blogs.append(name)
+                url = g.find('a', attrs={'class' : 'url'})
+                if url:
+                    url_name = url.get_text()
+                    urls.append(url_name)
+
+            for i in range(0, 5):
+                if urls[i] == input_url:
+                    rank = '%s위' %(i + 1)
         except:
             traceback.print_exc()
     except:
         traceback.print_exc()
-
-    return render_template('index.html', blogs=blogs)
+    
+    return render_template('index.html', url=input_url, keyword=keyword, rank=rank)
 
 
 @flask_app.route('/')
 def index():
-    return render_template('index.html', blogs=[])
+    return render_template('index.html', url=" ", keyword=" ", rank=" ")
 
 
 if __name__ == '__main__':

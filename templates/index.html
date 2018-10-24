@@ -23,6 +23,8 @@
 					<div class="form-group">
 						<label for="Keyword"> Keyword:</label>
 						<input type="text" class="form-control" id="keyword" name="keyword" />
+						<label for="Keyword"> URL:</label>
+						<input type="text" class="form-control" id="url" name="url" />
 					</div>
 					<button type="submit" class="btn btn-outline-secondary">SEARCH</button>
 				</form>
@@ -36,11 +38,9 @@
 				<span class='label label-info'> 순위 </span>
 			</div>
 		</div>
-		{% for b in blogs %}
 		<div class="row align-items-center">
 			<div class="col-md">
-				<span class='label label-info'>{{ b }}</span>
+				<span class='label label-info'>{{ url }} 은 "{{ keyword }}"에서 {{ rank }} 입니다.</span>
 			</div>
 		</div>
-		{% endfor %}
 	</div>
