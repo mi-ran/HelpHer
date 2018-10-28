@@ -19,18 +19,12 @@ def search_keyword():
         return
 
     keyword = request.form['keyword']
-    input_url = request.form['url']
-    base_url = 'https://search.naver.com/search.naver'
-
-    input_url = input_url.split('//')[-1]
-    print(keyword + " " + input_url + "[end]")
-    temp = input_url.split('.')
-    if temp[0] == 'm':
-        input_url = '.'.join(temp[1:])
+    input_url = request.form['url'].split('//')[-1]
+    base_url = 'https://m.search.naver.com/search.naver'
 
     values = {
-        'where' : 'post',
-        'sm' : 'tab_jum',
+        'where' : 'm_view',
+        'sm' : 'mtb_jum',
         'query' : keyword
     }
 
@@ -45,16 +39,18 @@ def search_keyword():
         res = urlopen(req)
         html_data = BS(res.read(), 'html.parser')
 
-        g_list = html_data.find_all('li', attrs={'class' : 'sh_blog_top'})
+        g_list = html_data.find_all('li', attrs={'class' : 'bx _item'})
         try:
             urls = []
             times = []
             for g in g_list:
-                time = g.find('dd', attrs={'class' : 'txt_inline'})
-                url = g.find('a', attrs={'class' : 'url'})
+                time = g.find('span', attrs={'class' : 'sub_time sub_txt'})
+                url = g.find('a', attrs={'class' : 'api_txt_lines total_tit'})
                 if url:
-                    times.append(time.get_text())
-                    url_name = url.get_text()
+                    t = time.get_text()
+                    times.append(t)
+                    url_name = url['href']
+                    url_name = url_name.split('//')[-1]
                     urls.append(url_name)
 
             for i in range(0, len(urls)):
