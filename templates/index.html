@@ -40,7 +40,15 @@
 		</div>
 		<div class="row align-items-center">
 			<div class="col-md">
-				<span class='label label-info'>{{ url }} 은 "{{ keyword }}"에서 {{ rank }} 입니다. ({{ time }})</span>
+				<span class='label label-info'>[{{ keyword }}] : {{ url }}</span>
+			</div>
+		</div>
+		<div class="row align-items-center">
+			<div class="col-md">
+				<span class='label label-info'>블로그 검색 결과 : {{ web_rank }} ({{ web_time }})</span>
+			</div>
+			<div class="col-md">
+				<span class='label label-info'>VIEW 검색 결과 : {{ m_rank }} ({{ m_time }})</span>
 			</div>
 		</div>
 	</div>
