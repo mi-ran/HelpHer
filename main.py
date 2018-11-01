@@ -13,6 +13,24 @@ from flask import make_response
 
 flask_app = Flask(__name__)
 
+
+def getPostDate(url):
+    print("here")
+    url = 'https://m.' + url 
+    ua = UserAgent()
+    req = Request(url, headers={'User-Agent': str(ua.chrome)})
+    res = urlopen(req)
+    html_data = BS(res.read(), 'html.parser')
+
+    g = html_data.find('p', attrs={'class' : 'se_date'})
+    date = ""
+    try:
+        date = g.get_text()
+    except:
+        traceback.print_exc()
+    return date
+
+
 def search(keyword, input_url):
     base_url = 'https://search.naver.com/search.naver'
     values = {
@@ -113,8 +131,19 @@ def search_keyword():
     if input_url.split('.')[0] == 'm':
         input_url = ".".join(input_url.split('.')[1:])
 
+    print(input_url)
+
     web_rank, web_time = search(keyword, input_url)
     m_rank, m_time = mSearch(keyword, input_url)
+
+    if web_time != " ":
+        m_time = web_time
+    elif m_time != " ":
+        web_time = m_time
+
+    if web_time == " " or m_time:
+        web_time = getPostDate(input_url)
+        m_time = web_time
 
     return render_template('index.html', url=input_url, keyword=keyword, web_rank=web_rank, web_time=web_time, m_rank=m_rank, m_time=m_time)
 
