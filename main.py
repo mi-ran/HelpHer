@@ -15,19 +15,22 @@ flask_app = Flask(__name__)
 
 
 def getPostDate(url):
-    print("here")
     url = 'https://m.' + url 
-    ua = UserAgent()
-    req = Request(url, headers={'User-Agent': str(ua.chrome)})
-    res = urlopen(req)
-    html_data = BS(res.read(), 'html.parser')
-
-    g = html_data.find('p', attrs={'class' : 'se_date'})
     date = ""
     try:
-        date = g.get_text()
+        ua = UserAgent()
+        req = Request(url, headers={'User-Agent': str(ua.chrome)})
+        res = urlopen(req)
+        html_data = BS(res.read(), 'html.parser')
+
+        g = html_data.find('p', attrs={'class' : 'se_date'})
+        try:
+            date = g.get_text()
+        except:
+            traceback.print_exc()
     except:
-        traceback.print_exc()
+        return ""
+        
     return date
 
 
@@ -132,6 +135,7 @@ def search_keyword():
         input_url = ".".join(input_url.split('.')[1:])
 
     print(input_url)
+    print(keyword)
 
     web_rank, web_time = search(keyword, input_url)
     m_rank, m_time = mSearch(keyword, input_url)
