@@ -134,8 +134,7 @@ def search_keyword():
     if input_url.split('.')[0] == 'm':
         input_url = ".".join(input_url.split('.')[1:])
 
-    print(input_url)
-    print(keyword)
+    print('%s : %s' %(keyword, input_url))
 
     web_rank, web_time = search(keyword, input_url)
     m_rank, m_time = mSearch(keyword, input_url)
