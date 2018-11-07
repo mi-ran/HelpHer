@@ -34,19 +34,10 @@ def getPostDate(url):
     return date
 
 
-def search(keyword, input_url):
+def search_for_web(query_string, input_url):
     base_url = 'https://search.naver.com/search.naver'
-    values = {
-        'where' : 'post',
-        'sm' : 'tab_jum',
-        'query' : keyword
-    }
-
-    query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
-    context = ssl._create_unverified_context()
-    rank = '순위 밖'
+    rank = 0
     url = ''
-    time_ = ' '
     try:
         ua = UserAgent()
         req = Request(base_url + '?' + query_string, headers={'User-Agent': str(ua.chrome)})
@@ -56,26 +47,44 @@ def search(keyword, input_url):
         g_list = html_data.find_all('li', attrs={'class' : 'sh_blog_top'})
         try:
             urls = []
-            times = []
             for g in g_list:
-                time = g.find('dd', attrs={'class' : 'txt_inline'})
                 url = g.find('a', attrs={'class' : 'url'})
                 if url:
-                    t = time.get_text()
-                    times.append(t)
                     url_name = url.get_text().split('//')[-1]
                     urls.append(url_name)
 
             for i in range(0, len(urls)):
                 if urls[i] == input_url:
-                    rank = '%s위' %(i + 1)
-                    time_ = times[i]
+                    rank = i + 1
         except:
             traceback.print_exc()
 
     except:
         traceback.print_exc()
-    return [rank, time_]
+    return rank
+
+
+def search(keyword, input_url):
+    values = {
+        'where' : 'post',
+        'sm' : 'tab_jum',
+        'query' : keyword
+    }
+    query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
+    rank = search_for_web(query_string, input_url)
+
+    if rank is 0:
+        values = {
+            'where' : 'post',
+            'sm' : 'tab_jum',
+            'query' : keyword,
+            'start' : '11'
+        }
+        query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
+        if rank is 0:
+            return '순위 밖'
+        rank = search_for_web(query_string, input_url) + 10
+    return '%s 위'%(rank)
 
 
 def mSearch(keyword, input_url):
@@ -88,10 +97,8 @@ def mSearch(keyword, input_url):
     }
 
     query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
-    context = ssl._create_unverified_context()
     rank = '순위 밖'
     url = ''
-    time_ = ' '
     try:
         ua = UserAgent()
         req = Request(base_url + '?' + query_string, headers={'User-Agent': str(ua.chrome)})
@@ -101,13 +108,9 @@ def mSearch(keyword, input_url):
         g_list = html_data.find_all('li', attrs={'class' : 'bx _item'})
         try:
             urls = []
-            times = []
             for g in g_list:
-                time = g.find('span', attrs={'class' : 'sub_time sub_txt'})
                 url = g.find('a', attrs={'class' : 'api_txt_lines total_tit'})
                 if url:
-                    t = time.get_text()
-                    times.append(t)
                     url_name = url['href']
                     url_name = url_name.split('//')[-1]
                     urls.append(url_name)
@@ -115,13 +118,12 @@ def mSearch(keyword, input_url):
             for i in range(0, len(urls)):
                 if urls[i] == input_url:
                     rank = '%s위' %(i + 1)
-                    time_ = times[i]
         except:
             traceback.print_exc()
 
     except:
         traceback.print_exc()
-    return [rank, time_]
+    return rank
 
 
 @flask_app.route('/searchKeyword', methods = ['GET', 'POST'])
@@ -136,19 +138,11 @@ def search_keyword():
 
     print('%s : %s' %(keyword, input_url))
 
-    web_rank, web_time = search(keyword, input_url)
-    m_rank, m_time = mSearch(keyword, input_url)
+    web_rank = search(keyword, input_url)
+    m_rank = mSearch(keyword, input_url)
+    time = getPostDate(input_url)
 
-    if web_time != " ":
-        m_time = web_time
-    elif m_time != " ":
-        web_time = m_time
-
-    if web_time == " " or m_time:
-        web_time = getPostDate(input_url)
-        m_time = web_time
-
-    return render_template('index.html', url=input_url, keyword=keyword, web_rank=web_rank, web_time=web_time, m_rank=m_rank, m_time=m_time)
+    return render_template('index.html', url=input_url, keyword=keyword, web_rank=web_rank, web_time=time, m_rank=m_rank, m_time=time)
 
 
 @flask_app.route('/')
