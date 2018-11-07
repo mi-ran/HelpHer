@@ -15,7 +15,18 @@ flask_app = Flask(__name__)
 
 
 def getPostDate(url):
-    url = 'https://m.' + url 
+    if url.startswith('blog'):
+        url = 'https://m.' + url 
+    else:
+        logNo = url.split('/')[-1]
+        blogId = ''
+        if url.split('.')[0] == 'dhaliaxjapan':
+            blogId = 'dhaliaxjapan'
+        elif url.split('.')[0] == 'misangu':
+            blogId = 'musoi99'
+        url = 'https://m.blog.naver.com/PostView.nhn?blogId=%s&logNo=%s'%(blogId, logNo)
+        
+    print(url)
     date = ""
     try:
         ua = UserAgent()
