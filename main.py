@@ -45,8 +45,17 @@ def getPostDate(url):
     return date
 
 
-def search_for_web(query_string, input_url):
+def search_for_web(start, page, kyword, input_url):
     base_url = 'https://search.naver.com/search.naver'
+    values = {
+        'where' : 'web',
+        'sm' : 'tab_pge',
+	'start' : start,
+	'display' : '10',
+	'page' : page,
+        'query' : keyword
+    }
+    query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
     rank = 0
     url = ''
     try:
@@ -76,25 +85,10 @@ def search_for_web(query_string, input_url):
 
 
 def search(keyword, input_url):
-    values = {
-        'where' : 'post',
-        'sm' : 'tab_jum',
-        'query' : keyword
-    }
-    query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
-    rank = search_for_web(query_string, input_url)
-
-    if rank is 0:
-        values = {
-            'where' : 'post',
-            'sm' : 'tab_jum',
-            'query' : keyword,
-            'start' : '11'
-        }
-        query_string = parse.urlencode(values, encoding='UTF-8', doseq=True)
-        if rank is 0:
-            return '순위 밖'
-        rank = search_for_web(query_string, input_url) + 10
+    for i in range(2, 11) :
+	rank = search_for_web((10*i-2) + 1, i, query_string, input_url)
+	if rank is not 0:
+	    return '%s 페이지 %s 위'%(i, rank)
     return '%s 위'%(rank)
 
 
@@ -144,16 +138,12 @@ def search_keyword():
 
     keyword = request.form['keyword']
     input_url = request.form['url'].split('//')[-1]
-    if input_url.split('.')[0] == 'm':
-        input_url = ".".join(input_url.split('.')[1:])
 
     print('%s : %s' %(keyword, input_url))
 
     web_rank = search(keyword, input_url)
-    m_rank = mSearch(keyword, input_url)
-    time = getPostDate(input_url)
 
-    return render_template('index.html', url=input_url, keyword=keyword, web_rank=web_rank, web_time=time, m_rank=m_rank, m_time=time)
+    return render_template('index.html', url=input_url, keyword=keyword, web_rank=web_rank)
 
 
 @flask_app.route('/')
