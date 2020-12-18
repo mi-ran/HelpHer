@@ -89,7 +89,7 @@ def search(keyword, input_url):
 	rank = search_for_web((10*i-2) + 1, i, query_string, input_url)
 	if rank is not 0:
 	    return '%s 페이지 %s 위'%(i, rank)
-    return '%s 위'%(rank)
+    return '순위 밖'
 
 
 def mSearch(keyword, input_url):
